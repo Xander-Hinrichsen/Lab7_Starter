@@ -1,6 +1,7 @@
 // main.js
 
 // CONSTANTS
+const RECIPES_STORAGE_KEY = 'recipes';
 const RECIPE_URLS = [
   'https://introweb.tech/assets/json/1_50-thanksgiving-side-dishes.json',
   'https://introweb.tech/assets/json/2_roasting-turkey-breast-with-stuffing.json',
@@ -42,8 +43,8 @@ function initializeServiceWorker() {
   // websites to have some (if not all) functionality offline! I highly
   // recommend reading up on ServiceWorkers on MDN before continuing.
   /*******************/
-  // We first must register our ServiceWorker here before any of the code in
-  // sw.js is executed.
+
+  // We first must check if 'serviceWorker' is supported in the current browser.
   // B1. TODO - Check if 'serviceWorker' is supported in the current browser
   // B2. TODO - Listen for the 'load' event on the window object.
   // Steps B3-B6 will be *inside* the event listener's function created in B2
@@ -54,7 +55,15 @@ function initializeServiceWorker() {
   // B5. TODO - In the event that the service worker registration fails, console
   //            log that it has failed.
   // STEPS B6 ONWARDS WILL BE IN /sw.js
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js')
+        .then(function(reg) {console.log('Sw success');})
+        .catch(function(err) {console.log(`Sw failed ${err}`);});
+    });
+  }
 }
+
 
 /**
  * Reads 'recipes' from localStorage and returns an array of
@@ -68,6 +77,10 @@ async function getRecipes() {
   // EXPOSE - START (All expose numbers start with A)
   // A1. TODO - Check local storage to see if there are any recipes.
   //            If there are recipes, return them.
+  let stuff = localStorage.getItem(RECIPES_STORAGE_KEY)
+  if (stuff){
+    return JSON.parse(stuff);
+  }
   /**************************/
   // The rest of this method will be concerned with requesting the recipes
   // from the network
@@ -100,6 +113,19 @@ async function getRecipes() {
   //            resolve() method.
   // A10. TODO - Log any errors from catch using console.error
   // A11. TODO - Pass any errors to the Promise's reject() function
+  let arr_recipes = [];
+  return new Promise(async(resolve, reject)=>{
+    try {
+      for (let i = 0; i < RECIPE_URLS.length; i++) {
+        let recipe = await fetch(RECIPE_URLS[i]);
+        const json = await recipe.json();
+        arr_recipes.push(json);
+      }
+      saveRecipesToStorage(arr_recipes);
+      resolve(arr_recipes);
+    }
+    catch (err) {console.error(err); reject(err);}
+  });
 }
 
 /**
