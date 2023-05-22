@@ -117,7 +117,7 @@ async function getRecipes() {
   return new Promise(async(resolve, reject)=>{
     try {
       for (let i = 0; i < RECIPE_URLS.length; i++) {
-        let recipe = await fetch(RECIPE_URLS[i]);
+        const recipe = await fetch(RECIPE_URLS[i]);
         const tjson = await recipe.json();
         arr_recipes.push(tjson);
       }
