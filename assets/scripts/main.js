@@ -118,8 +118,8 @@ async function getRecipes() {
     try {
       for (let i = 0; i < RECIPE_URLS.length; i++) {
         let recipe = await fetch(RECIPE_URLS[i]);
-        const json = await recipe.json();
-        arr_recipes.push(json);
+        const tjson = await recipe.json();
+        arr_recipes.push(tjson);
       }
       saveRecipesToStorage(arr_recipes);
       resolve(arr_recipes);
